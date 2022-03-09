@@ -1,53 +1,53 @@
 const mongoose = require("mongoose")
 
 const PokemonSchema = mongoose.Schema({
-    Name : {
+    name : {
         type : String,
         required : [true,"Pokemon Harus Memiliki Nama"],
         min : [1,"Nama Pokemon Terlalu Pendek"],
         max : [255,"Nama Pokemon Terlalu Panjang"]
     },
-    Type1 : {
+    type1 : {
         type : String,
         required : false
     },
-    Type2 : {
+    type2 : {
         type : String,
         required : false    
     },
-    Total : {
+    total : {
         type : Number,
         required : false
     },
-    HP : {
+    hp : {
         type : Number,
         required : false
     },
-    Attack : {
+    attack : {
         type : Number,
         required : false
     },
-    Defense : {
+    defense : {
         type : Number,
         required : false
     },
-    SpAtt :{
+    spAtt :{
         type : Number,
         required : false
     },
-    SpDeff :{
+    spDeff :{
         type : Number,
         required : false
     },
-    Speed : {
+    speed : {
         type : Number,
         required : false
     },
-    Generation : {
+    generation : {
         type : Number,
         required : false
     },
-    Legendary : {
+    legendary : {
         type : Boolean,
         required : false
     },

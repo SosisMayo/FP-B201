@@ -6,32 +6,32 @@ const Pokemon = require("../models/pokemonSchema")
 router.post("/",async (req,res)=>{
     // Cari apa namanya ada atau tidak
     const poke = await Pokemon.find({
-        Name : req.body.Name
+        name : req.body.name
     })
     // Kalau ada
     if(poke[0]){
-        res.status(400).send(`Data Pokemon ${req.body.Name} sudah ada!`)
+        res.status(400).send(`Data Pokemon ${req.body.name} sudah ada!`)
     }
     // Kalau gak ada
     else{
         const Poke = new Pokemon({
-            Name : req.body.Name,
-            Type1 : req.body.Type1,
-            Type2 : req.body.Type2,
-            Total : req.body.Total,
-            HP : req.body.HP,
-            Attack : req.body.Attack,
-            Defense : req.body.Defense,
-            SpAtt : req.body.SpAtt,
-            SpDeff : req.body.SpDeff,
-            Speed : req.body.Speed,
-            Generation : req.body.Generation,
-            Legendary : req.body.Legendary,
+            name : req.body.name,
+            type1 : req.body.type1,
+            type2 : req.body.type2,
+            total : req.body.total,
+            hp : req.body.hp,
+            attack : req.body.attack,
+            defense : req.body.defense,
+            spAtt : req.body.spAtt,
+            spDeff : req.body.spDeff,
+            speed : req.body.speed,
+            generation : req.body.generation,
+            legendary : req.body.legendary,
         });
         try{
             await Poke.save()
             res.status(201).json({
-                message : `${req.body.Name} telah ditambahkan!`,
+                message : `${req.body.name} telah ditambahkan!`,
                 data : req.body
             })
         }    
@@ -73,7 +73,7 @@ router.get("/", async (req,res)=>{
 //READ POKEMON BY NAME
 router.get("/:name", async (req,res)=>{
     const poke = await Pokemon.find({
-        Name : req.params.name
+        name : req.params.name
     })
     if (poke[0]){
         try{
@@ -100,10 +100,10 @@ router.get("/:name", async (req,res)=>{
 //UPDATE POKEMON BY ID
 router.put('/:name',async (req,res)=>{
     let poke = await Pokemon.find({
-        Name : req.params.name
+        name : req.params.name
     })
     if (poke[0]){
-        if (req.body.Name || req.body.Legendary || req.body.Generation){
+        if (req.body.name || req.body.legendary || req.body.generation){
             res.status(400).json({
                 message : "Bad Request!",
                 error : "Nama,Generasi, dan status Legendary Pokemon Tidak Dapat Diubah"
@@ -134,12 +134,12 @@ router.put('/:name',async (req,res)=>{
 //DELETE POKEMON BY NAME
 router.delete("/:name", async (req,res)=>{
     const poke = await Pokemon.find({
-        Name : req.params.name
+        name : req.params.name
     })
     if (poke[0]){
         try{
             await Pokemon.deleteOne({
-                Name : req.params.name
+                name : req.params.name
             })
             res.status(200).json({
                 message : `Data Pokemon ${req.params.name} Telah Dihapus!`
