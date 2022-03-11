@@ -9,47 +9,56 @@ const PokemonSchema = mongoose.Schema({
     },
     type1 : {
         type : String,
-        required : false
+        required : true,
     },
     type2 : {
         type : String,
-        required : false    
+        required : false,    
     },
     total : {
         type : Number,
-        required : false
+        required : true,
+        default : 999
     },
     hp : {
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     attack : {
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     defense : {
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     spAtt :{
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     spDeff :{
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     speed : {
         type : Number,
-        required : false
+        required : true,
+        default : 50
     },
     generation : {
         type : Number,
-        required : false
+        required : true,
+        default : 1
     },
     legendary : {
         type : Boolean,
-        required : false
+        required : true,
+        default : false
     },
 })
 
