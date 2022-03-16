@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+
+  poke-api:
+    image : sosismayo/fp-b201:poke-api
+    container_name : poke-api
+    depends_on:
+      - reverse-proxy
+    ports :
+      - "3000:3000"
+    restart : unless-stopped
+  reverse-proxy:
+    container_name : reverse-proxy
+    ports : 
+      - "80:80"
+    image: sosismayo/fp-b201:reverse-proxy
+    restart : unless-stopped
