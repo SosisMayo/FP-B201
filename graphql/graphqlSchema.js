@@ -1,5 +1,6 @@
 const {buildSchema} = require("graphql")
-const pokemonController = require("../controllers/pokemon")
+const Pokemon = require("../models/pokemonSchema")
+const User = require("../models/userSchema")
 
 exports.schema = buildSchema(`
     type Pokemon {
@@ -16,18 +17,39 @@ exports.schema = buildSchema(`
         generation : Int!
         legendary : Boolean!
     }
+
+    type User {
+        username : String!
+        password : String!
+        role : role!
+    }
+
+    enum role{
+        admin
+        user
+    }
+
     type Query {
-        hello : String
-        getAllPokemon : [Pokemon]
+        getAllPokemon : [Pokemon!]!
+        getPokemonByName(name : String!) : Pokemon!
+        getAllUser : [User!]!
     }
 `)
 
 exports.root = {
-    hello : ()=> {
-        return "Hello World"
+    getAllPokemon : async () => {
+        const pokemon = await Pokemon.find()
+        return pokemon
     },
-    getAllPokemon : async function(){
-        //const pokemon = await fetch('localhost:3000/api/pokemon')
-        return []
+
+    getPokemonByName : async (args) => {
+        const pokemon = await Pokemon.findOne({name : args.name})
+        if (pokemon){
+            return pokemon
+        }
+    },
+
+    getAllUser : async (context) => {
+        console.log(context)
     }
 }

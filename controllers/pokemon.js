@@ -49,27 +49,35 @@ exports.createPokemon = async function(req,res){
 }
 
 exports.getAllPokemon = async function(req,res){
-    // Cari apa sudah ada data pokemon
-    const poke = await Pokemon.find();
-    // Kalau ada
-    if(poke[0]){
-        try{
-            res.status(200).json({
-                message : "Sukses!",
-                data : poke
-            })
-        }
-        catch(err){
-            res.status(400).json({
-                message : "Bad Request!",
-                error : err.message
-            })
-        }
+    if(res.result){
+        res.status(200).json({
+            message : "Sukses!",
+            data : res.result
+        })
     }
     else{
-        res.status(404).json({
-            message : "Data Pokemon Tidak Ditemukan!"
-        })
+        // Cari apa sudah ada data pokemon
+        const poke = await Pokemon.find();
+        // Kalau ada
+        if(poke[0]){
+            try{
+                res.status(200).json({
+                    message : "Sukses!",
+                    data : poke
+                })
+            }
+            catch(err){
+                res.status(400).json({
+                    message : "Bad Request!",
+                    error : err.message
+                })
+            }
+        }
+        else{
+            res.status(404).json({
+                message : "Data Pokemon Tidak Ditemukan!"
+            })
+        }
     }
 }
 

@@ -4,6 +4,7 @@ const bodyparser = require("body-parser")
 const {graphqlHTTP} = require("express-graphql")
 const graphqlSchema = require("./graphql/graphqlSchema")
 const mainRouter = require("./routes")
+const req = require("express/lib/request")
 
 const startApp = async function(){
     app.use(bodyparser.json())
@@ -12,16 +13,11 @@ const startApp = async function(){
     await require("./database/connection.js")
     
     //Route
-
-    const corsOptions = {
-        origin: "http://localhost:3000",
-        credentials: true
-      };
     app.use("/graphql", graphqlHTTP({
         schema : graphqlSchema.schema,
         rootValue : graphqlSchema.root,
         graphiql : true,
-        cors : corsOptions
+        context : req.user
     }))
 
     app.use("/api", mainRouter)

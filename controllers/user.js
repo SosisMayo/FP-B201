@@ -2,53 +2,61 @@ const User = require("../models/userSchema")
 const bcrypt = require("bcrypt")
 
 exports.getAllUser = async function(req,res){
-    // Jika admin tampilkan semua data user
-    if(req.user.role == "admin"){
-        try {
-            const user =  await User.find().select({_id:0,__v:0})
-            if (user[0]){
-                res.status(200).json({
-                    message : "Sukses!",
-                    data : user
+    if(res.result){
+        res.status(200).json({
+            message : "Sukses!",
+            data : res.result
+        })
+    }
+    else{
+        // Jika admin tampilkan semua data user
+        if(req.user.role == "admin"){
+            try {
+                const user =  await User.find().select({_id:0,__v:0})
+                if (user[0]){
+                    res.status(200).json({
+                        message : "Sukses!",
+                        data : user
+                    })
+                }
+                else{
+                    res.status(404).json({
+                        message : "Not Found!",
+                        error : "Tidak ada data user"
+                    })
+                }
+            }
+            catch(err){
+                res.status(400).json({
+                    message : "Bad Request!",
+                    error : err
                 })
+            }
+        }
+        // Jika user, hanya tampilkan data miliknya
+        else if(req.user.role == "user"){
+            const user = User.findOne({
+                username : req.user.username
+            }).select({_id:0,__v:0})
+            if(user){
+                try {
+                    res.status(200).json({
+                        message : "Sukses!",
+                        data : req.user
+                    })
+                } catch (err) {
+                    res.status(400).json({
+                        message : "Bad Request!",
+                        error : err.message
+                    })
+                }
             }
             else{
                 res.status(404).json({
                     message : "Not Found!",
-                    error : "Tidak ada data user"
+                    error : "Data anda tidak ditemukan"
                 })
             }
-        }
-        catch(err){
-            res.status(400).json({
-                message : "Bad Request!",
-                error : err
-            })
-        }
-    }
-    // Jika user, hanya tampilkan data miliknya
-    else if(req.user.role == "user"){
-        const user = User.findOne({
-            username : req.user.username
-        }).select({_id:0,__v:0})
-        if(user){
-            try {
-                res.status(200).json({
-                    message : "Sukses!",
-                    data : req.user
-                })
-            } catch (err) {
-                res.status(400).json({
-                    message : "Bad Request!",
-                    error : err.message
-                })
-            }
-        }
-        else{
-            res.status(404).json({
-                message : "Not Found!",
-                error : "Data anda tidak ditemukan"
-            })
         }
     }
 }
