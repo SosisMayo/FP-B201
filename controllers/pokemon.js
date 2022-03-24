@@ -1,7 +1,16 @@
 const Pokemon = require("../models/pokemonSchema")
+const {pokemonValidation} = require("../validation/inputValidation")
 
 exports.createPokemon = async function(req,res){
     if(req.user.role == "admin"){
+        try {
+            const {error,value} = await pokemonValidation.validateAsync(req.body)
+        } catch (error) {
+            res.status(400).json({
+                message : "Bad Request!",
+                error : error.message
+            })
+        }
         // Cari apa namanya ada atau tidak
         const poke = await Pokemon.find({
             name : req.body.name
@@ -108,44 +117,52 @@ exports.getPokemonByName = async function(req,res){
 }
 
 exports.updatePokemonByName = async function(req,res){
-    if(req.user.role == "admin"){
-        let poke = await Pokemon.find({
-            name : req.params.name
-        })
-        if (poke[0]){
-            if (req.body.name || req.body.legendary || req.body.generation){
-                res.status(400).json({
-                    message : "Bad Request!",
-                    error : "Nama,Generasi, dan status Legendary Pokemon Tidak Dapat Diubah"
-                })
-            }
-            else{
-                try{
-                    Object.assign(poke[0],req.body)
-                    await poke[0].save()
-                    res.status(200).json({
-                        message : "Sukses!",
-                        data : poke[0]
-                    })
-                }
-                catch(err){
+    try {
+        const {error,value} = await pokemonValidation.validateAsync(req.body)
+        if(req.user.role == "admin"){
+            let poke = await Pokemon.find({
+                name : req.params.name
+            })
+            if (poke[0]){
+                if (req.body.name || req.body.legendary || req.body.generation){
                     res.status(400).json({
                         message : "Bad Request!",
-                        error : err
+                        error : "Nama,Generasi, dan status Legendary Pokemon Tidak Dapat Diubah"
                     })
                 }
+                else{
+                    try{
+                        Object.assign(poke[0],req.body)
+                        await poke[0].save()
+                        res.status(200).json({
+                            message : "Sukses!",
+                            data : poke[0]
+                        })
+                    }
+                    catch(err){
+                        res.status(400).json({
+                            message : "Bad Request!",
+                            error : err
+                        })
+                    }
+                }
+            }
+            else{
+                res.status(404).json({
+                    message : "Not Found!",
+                    error : `Data Pokemon ${req.params.name} Tidak Ditemukan!`
+                })
             }
         }
-        else{
-            res.status(404).json({
-                message : "Not Found!",
-                error : `Data Pokemon ${req.params.name} Tidak Ditemukan!`
+        else {
+            res.status(403).json({
+                message : "User dilarang melakukan perubahan data"
             })
         }
-    }
-    else {
-        res.status(403).json({
-            message : "User dilarang melakukan perubahan data"
+    } catch (error) {
+        res.status(400).json({
+            message : "Bad Request!",
+            error : error.message
         })
     }
 }

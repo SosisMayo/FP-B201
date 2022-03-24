@@ -1,10 +1,12 @@
 const User = require("../models/userSchema")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
+const {userValidation} = require("../validation/inputValidation")
 
 exports.register = async function(req,res){
     const salt = await bcrypt.genSalt(5)
     try{
+        const {error,value} = await userValidation.validateAsync(req.body)
         const user = new User({
             username : req.body.username,
             password : await bcrypt.hash(req.body.password,salt),
@@ -25,43 +27,52 @@ exports.register = async function(req,res){
 }
 
 exports.login = async function(req,res){
-    const user = await User.findOne({
-        username : req.body.username
-    })
-    if(user){
-        bcrypt.compare(req.body.password,user.password,async (err,resp)=>{
-            if (err){
-                res.status(400).json({
-                    message : "Bad Request!",
-                    error : err.message
-                })
-            }
-            if(resp){
-                const accessToken = jwt.sign({username:user.username,role:user.role},process.env.JWT_ACCESS_TOKEN,{expiresIn:"30s"})
-                const refreshToken = jwt.sign({username:user.username,role:user.role},process.env.JWT_REFRESH_TOKEN,{expiresIn:"1h"})
-                try{
-                    await User.findOneAndUpdate({
-                        username : req.body.username
-                    },
-                    {
-                        refreshToken : refreshToken
-                    })
-                    res.header("Authorization",accessToken).status(200).json({
-                        accessToken,
-                        refreshToken
-                    })
-                } catch (err) {
+    try {
+        const {error,value} = await userValidation.validateAsync(req.body)
+        const user = await User.findOne({
+            username : req.body.username
+        })
+        if(user){
+            bcrypt.compare(req.body.password,user.password,async (err,resp)=>{
+                if (err){
                     res.status(400).json({
                         message : "Bad Request!",
                         error : err.message
                     })
-                }    
-            }
-            else{
-                res.status(400).json({
-                    message : "Password Salah",
-                })
-            }
+                }
+                if(resp){
+                    const accessToken = jwt.sign({username:user.username,role:user.role},process.env.JWT_ACCESS_TOKEN,{expiresIn:"30s"})
+                    const refreshToken = jwt.sign({username:user.username,role:user.role},process.env.JWT_REFRESH_TOKEN,{expiresIn:"1h"})
+                    try{
+                        await User.findOneAndUpdate({
+                            username : req.body.username
+                        },
+                        {
+                            refreshToken : refreshToken
+                        })
+                        res.header("Authorization",accessToken).status(200).json({
+                            accessToken,
+                            refreshToken
+                        })
+                        res.end()
+                    } catch (err) {
+                        res.status(400).json({
+                            message : "Bad Request!",
+                            error : err.message
+                        })
+                    }    
+                }
+                else{
+                    res.status(400).json({
+                        message : "Password Salah",
+                    })
+                }
+            })
+        }
+    } catch (error) {
+        res.status(400).json({
+            message : "Bad Request",
+            error : error.message
         })
     }
 }
@@ -76,6 +87,7 @@ exports.refresh = async function(req,res){
             res.header("Authorization",accessToken).status(200).json({
                 accessToken
             })
+            res.end()
         }
         catch(err){
             res.status(400).json({

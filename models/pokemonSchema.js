@@ -1,11 +1,12 @@
 const mongoose = require("mongoose")
+const joi = require("joi")
 
 const PokemonSchema = mongoose.Schema({
     name : {
         type : String,
         required : [true,"Pokemon Harus Memiliki Nama"],
         min : [1,"Nama Pokemon Terlalu Pendek"],
-        max : [255,"Nama Pokemon Terlalu Panjang"]
+        max : [20,"Nama Pokemon Terlalu Panjang"]
     },
     type1 : {
         type : String,

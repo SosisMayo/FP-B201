@@ -1,5 +1,6 @@
 const User = require("../models/userSchema")
 const bcrypt = require("bcrypt")
+const { userValidation } = require("../validation/inputValidation")
 
 exports.getAllUser = async function(req,res){
     if(res.result){
@@ -112,54 +113,15 @@ exports.getUserByUsername = async function(req,res){
 }
 
 exports.updateUserByUsername = async function(req,res){
-    // Admin bisa ganti semua data
-    if(req.user.role == "admin"){
-        let user = await User.findOne({
-            username : req.params.username
-        })
-        if (user){
-            if (req.body.role ){
-                res.status(400).json({
-                    message : "Bad Request!",
-                    error : "Hanya dapat mengubah username dan password"
-                })
-            }
-            try{
-                if(req.body.username){
-                    user.username = req.body.username
-                }
-                if(req.body.password){
-                    const salt = await bcrypt.genSalt(5)
-                    user.password = await bcrypt.hash(req.body.password,salt)
-                }
-                await user.save()
-                res.status(200).json({
-                    message : "Sukses!",
-                    data : user
-                })
-            }
-            catch(err){
-                res.status(400).json({
-                    message : "Bad Request!",
-                    error : err.message
-                })
-            }
-        }
-        else{
-            res.status(404).json({
-                message : "Not Found!",
-                error : `Data user dengan nama ${req.params.username} tidak ditemukan`
+    try {
+        const {error,value} = await userValidation.validateAsync(req.body)
+        // Admin bisa ganti semua data
+        if(req.user.role == "admin"){
+            let user = await User.findOne({
+                username : req.params.username
             })
-        }
-    }
-    // User hanya bisa ganti data dia sendiri
-    else if(req.user.role == "user"){
-        const thisUser = await User.findOne({
-            username : req.params.username
-        })
-        if(thisUser){
-            if (req.user.username == req.params.username){
-                if (req.body.role){
+            if (user){
+                if (req.body.role ){
                     res.status(400).json({
                         message : "Bad Request!",
                         error : "Hanya dapat mengubah username dan password"
@@ -167,16 +129,16 @@ exports.updateUserByUsername = async function(req,res){
                 }
                 try{
                     if(req.body.username){
-                        thisUser.username = req.body.username
+                        user.username = req.body.username
                     }
                     if(req.body.password){
                         const salt = await bcrypt.genSalt(5)
-                        thisUser.password = await(bcrypt.hash(req.body.password,salt))
+                        user.password = await bcrypt.hash(req.body.password,salt)
                     }
-                    await thisUser.save()
+                    await user.save()
                     res.status(200).json({
                         message : "Sukses!",
-                        data : thisUser
+                        data : user
                     })
                 }
                 catch(err){
@@ -187,17 +149,64 @@ exports.updateUserByUsername = async function(req,res){
                 }
             }
             else{
-                res.status(403).json({
-                    message : "Dilarang mengubah data user lain!"
+                res.status(404).json({
+                    message : "Not Found!",
+                    error : `Data user dengan nama ${req.params.username} tidak ditemukan`
                 })
             }
         }
-        else{
-            res.status(404).json({
-                message : "Not Found!",
-                error : `Data user dengan nama ${req.params.username} tidak ditemukan`
+        // User hanya bisa ganti data dia sendiri
+        else if(req.user.role == "user"){
+            const thisUser = await User.findOne({
+                username : req.params.username
             })
+            if(thisUser){
+                if (req.user.username == req.params.username){
+                    if (req.body.role){
+                        res.status(400).json({
+                            message : "Bad Request!",
+                            error : "Hanya dapat mengubah username dan password"
+                        })
+                    }
+                    try{
+                        if(req.body.username){
+                            thisUser.username = req.body.username
+                        }
+                        if(req.body.password){
+                            const salt = await bcrypt.genSalt(5)
+                            thisUser.password = await(bcrypt.hash(req.body.password,salt))
+                        }
+                        await thisUser.save()
+                        res.status(200).json({
+                            message : "Sukses!",
+                            data : thisUser
+                        })
+                    }
+                    catch(err){
+                        res.status(400).json({
+                            message : "Bad Request!",
+                            error : err.message
+                        })
+                    }
+                }
+                else{
+                    res.status(403).json({
+                        message : "Dilarang mengubah data user lain!"
+                    })
+                }
+            }
+            else{
+                res.status(404).json({
+                    message : "Not Found!",
+                    error : `Data user dengan nama ${req.params.username} tidak ditemukan`
+                })
+            }
         }
+    } catch (error) {
+        res.status(400).json({
+            message : "Bad Request!",
+            error : error.message
+        })
     }
 }
 
