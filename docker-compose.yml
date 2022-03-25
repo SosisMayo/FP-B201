@@ -14,3 +14,6 @@ services:
       - "443:443"
     image: sosismayo/fp-b201:reverse-proxy
     restart : unless-stopped
+    volumes : 
+      - ./nginx/ssl/example.crt:/etc/nginx/ssl/example.crt
+      - ./nginx/ssl/example.key:/etc/nginx/ssl/example.key
