@@ -69,6 +69,11 @@ exports.login = async function(req,res){
                 }
             })
         }
+        else{
+            res.status(404).json({
+                message : "User Tidak Ditemukan!"
+            })
+        }
     } catch (error) {
         res.status(400).json({
             message : "Bad Request",

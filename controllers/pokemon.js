@@ -17,7 +17,9 @@ exports.createPokemon = async function(req,res){
         })
         // Kalau ada
         if(poke[0]){
-            res.status(400).send(`Data Pokemon ${req.body.name} sudah ada!`)
+            res.status(400).json({
+                message : `Data Pokemon ${req.body.name} sudah ada!`
+            })
         }
         // Kalau gak ada
         else{

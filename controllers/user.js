@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt")
 const { userValidation } = require("../validation/inputValidation")
 
 exports.getAllUser = async function(req,res){
-    if(res.result){
+    if(res.result && req.user.role == 'admin'){
         res.status(200).json({
             message : "Sukses!",
             data : res.result
@@ -36,7 +36,7 @@ exports.getAllUser = async function(req,res){
         }
         // Jika user, hanya tampilkan data miliknya
         else if(req.user.role == "user"){
-            const user = User.findOne({
+            const user = await User.findOne({
                 username : req.user.username
             }).select({_id:0,__v:0})
             if(user){
@@ -238,5 +238,10 @@ exports.deleteUserByUsername = async function(req,res){
                 error : `Data user dengan nama ${req.params.username} tidak ditemukan`
             })
         }
+    }
+    else{
+        res.status(403).json({
+            message : "User Dilarang Melakukan Delete !"
+        })
     }
 }
